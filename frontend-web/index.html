@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart City Guide & All-India Urban Navigator | Bharat 360</title>
+    <meta name="description" content="Pan-India Smart City Guide, Tourism Navigator, Civic Grievance Portal, and SOS Emergency Radar covering all Indian States, Major Cities, Heritage Streets & Local Bazaars.">
+
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- 1. TOP TICKER & PAN-INDIA ANNOUNCEMENT BAR -->
+    <header class="top-announcement-bar">
+        <div class="container top-bar-inner">
+            <div class="top-bar-left">
+                <span class="top-pill live-aqi"><i class="fas fa-flag"></i> 28 States & 8 UTs Active</span>
+                <span class="top-pill"><i class="fas fa-road"></i> 100+ Heritage Streets & Food Lanes</span>
+                <span class="top-pill"><i class="fas fa-tower-broadcast"></i> IoT Telemetry Grid Online</span>
+            </div>
+            <div class="top-bar-right">
+                <button onclick="window.smartCityApp.openModal('professor-downloads-modal')" style="background: #2563eb; color: #fff; font-weight: 700; padding: 4px 14px; border-radius: var(--radius-full); font-size: 0.775rem; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(37,99,235,0.4);">
+                    <i class="fas fa-graduation-cap"></i> Professor Submission Kit (Download PDF & Code)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. NAVBAR -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="brand-logo">
+                <div class="brand-icon-box">
+                    <i class="fas fa-city"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>SMARTCITY<span style="color: var(--primary-600);">INDIA</span></h1>
+                    <span>All-India Smart Urban Portal</span>
+                </div>
+            </div>
+
+            <ul class="nav-links">
+                <li><button class="nav-item-btn active" data-view="explore"><i class="fas fa-compass"></i> Explore India</button></li>
+                <li><button class="nav-item-btn" data-view="map"><i class="fas fa-map-location-dot"></i> Spatial Map</button></li>
+                <li><button class="nav-item-btn" data-view="emergency"><i class="fas fa-hospital"></i> SOS Emergency</button></li>
+                <li><button class="nav-item-btn" data-view="grievances"><i class="fas fa-bullhorn"></i> Civic Issues</button></li>
+                <li><button class="nav-item-btn" data-view="events"><i class="fas fa-calendar-check"></i> Events & Passes</button></li>
+                <li><button class="nav-item-btn" data-view="weather"><i class="fas fa-temperature-half"></i> Climate & AQI</button></li>
+                <li id="nav-admin-btn"><button class="nav-item-btn" data-view="admin"><i class="fas fa-chart-pie"></i> Admin Hub</button></li>
+            </ul>
+
+            <div class="nav-actions">
+                <button onclick="window.smartCityApp.openModal('professor-downloads-modal')" style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; padding: 8px 14px; border-radius: var(--radius-full); font-size: 0.825rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-download"></i> Downloads
+                </button>
+
+                <select id="role-selector" class="btn-role-selector" title="Switch User Role">
+                    <option value="ROLE_CITIZEN">👤 Citizen Mode</option>
+                    <option value="ROLE_TOURIST">🌍 Tourist Pass</option>
+                    <option value="ROLE_ADMIN">🛡️ Municipal Admin</option>
+                </select>
+
+                <button onclick="window.smartCityApp.triggerSosAlert()" class="btn-sos-trigger">
+                    <i class="fas fa-triangle-exclamation"></i> SOS 112
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 3. HERO SECTION WITH STATE & CITY SELECTORS -->
+    <section class="hero-section">
+        <div class="container hero-content">
+            <div class="hero-badge">
+                <i class="fas fa-map-marked-alt"></i> Pan-India Smart Cities, Heritage Alleys, Local Streets & Bazaars
+            </div>
+            <h1 class="hero-title">Smart City & Street Explorer of India</h1>
+            <p class="hero-subtitle">
+                Discover monuments, iconic food streets, local heritage gullies, 24x7 emergency ICU beds, and lodge civic complaints across all Indian States and Union Territories.
+            </p>
+
+            <!-- State & City Selector + Search Bar -->
+            <div style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 24px; max-width: 960px; margin-left: auto; margin-right: auto;">
+                <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 2fr auto; gap: 10px; align-items: center;">
+                    
+                    <!-- State Selector -->
+                    <div>
+                        <select id="state-filter-select" class="form-control" style="background: #fff; font-weight: 600; color: var(--slate-800); height: 46px;">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <!-- City Selector -->
+                    <div>
+                        <select id="city-filter-select" class="form-control" style="background: #fff; font-weight: 600; color: var(--slate-800); height: 46px;">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <!-- Street / Place Search Bar -->
+                    <div style="background: #fff; border-radius: var(--radius-sm); display: flex; align-items: center; padding: 0 12px; height: 46px; border: 1px solid var(--slate-300);">
+                        <i class="fas fa-magnifying-glass" style="color: var(--slate-400); margin-right: 8px;"></i>
+                        <input type="text" id="hero-search-input" placeholder="Search street, monument, gully, food lane..." style="width: 100%; border: none; font-size: 0.95rem; color: var(--slate-800);">
+                    </div>
+
+                    <!-- Search Button -->
+                    <div>
+                        <button class="hero-search-btn" onclick="window.smartCityApp.loadPlaces()" style="height: 46px; padding: 0 20px; white-space: nowrap;">
+                            <i class="fas fa-compass"></i> Explore
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick City Shortcut Buttons -->
+            <div style="margin-bottom: 20px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;">
+                <span style="font-size: 0.825rem; color: var(--slate-300); display: flex; align-items: center; margin-right: 4px;"><b>Quick Cities:</b></span>
+                <button onclick="window.smartCityApp.selectQuickCity('New Delhi', 'Delhi (NCR)')" class="hero-tag-btn">🏛️ Delhi (NCR)</button>
+                <button onclick="window.smartCityApp.selectQuickCity('Mumbai', 'Maharashtra')" class="hero-tag-btn">🌊 Mumbai</button>
+                <button onclick="window.smartCityApp.selectQuickCity('Jaipur', 'Rajasthan')" class="hero-tag-btn">🏰 Jaipur</button>
+                <button onclick="window.smartCityApp.selectQuickCity('Varanasi', 'Uttar Pradesh')" class="hero-tag-btn">🪔 Varanasi</button>
+                <button onclick="window.smartCityApp.selectQuickCity('Bengaluru', 'Karnataka')" class="hero-tag-btn">💻 Bengaluru</button>
+                <button onclick="window.smartCityApp.selectQuickCity('Kolkata', 'West Bengal')" class="hero-tag-btn">🚋 Kolkata</button>
+                <button onclick="window.smartCityApp.selectQuickCity('Chennai', 'Tamil Nadu')" class="hero-tag-btn">🏖️ Chennai</button>
+                <button onclick="window.smartCityApp.selectQuickCity('Hyderabad', 'Telangana')" class="hero-tag-btn">🍛 Hyderabad</button>
+                <button onclick="window.smartCityApp.selectQuickCity('Kochi', 'Kerala')" class="hero-tag-btn">🌴 Kochi</button>
+                <button onclick="window.smartCityApp.selectQuickCity('Amritsar', 'Punjab')" class="hero-tag-btn">✨ Amritsar</button>
+                <button onclick="window.smartCityApp.selectQuickCity('Indore', 'Madhya Pradesh')" class="hero-tag-btn">🍲 Indore</button>
+                <button onclick="window.smartCityApp.selectQuickCity('Shimla', 'Himachal Pradesh')" class="hero-tag-btn">🏔️ Shimla</button>
+                <button onclick="window.smartCityApp.selectQuickCity('Panaji', 'Goa')" class="hero-tag-btn">🏖️ Goa</button>
+            </div>
+
+            <!-- Category Filter Tags -->
+            <div class="hero-tags">
+                <button class="hero-tag-btn active" onclick="window.smartCityApp.filterPlacesByCategory('all', this)"><i class="fas fa-border-all"></i> All Categories</button>
+                <button class="hero-tag-btn" onclick="window.smartCityApp.filterPlacesByCategory('HERITAGE', this)"><i class="fas fa-landmark"></i> Forts & Monuments</button>
+                <button class="hero-tag-btn" onclick="window.smartCityApp.filterPlacesByCategory('PARKS', this)"><i class="fas fa-water"></i> Ghats & Lakes</button>
+                <button class="hero-tag-btn" onclick="window.smartCityApp.filterPlacesByCategory('FOOD', this)"><i class="fas fa-utensils"></i> Famous Food Streets</button>
+                <button class="hero-tag-btn" onclick="window.smartCityApp.filterPlacesByCategory('SHOPPING', this)"><i class="fas fa-bag-shopping"></i> Heritage Bazaars</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. VIEW: EXPLORE PLACES -->
+    <section id="view-explore" class="section view-section">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">City Landmarks, Heritage Streets & Alleys</h2>
+                    <p class="section-desc">Showing verified attractions, street food hubs, and cultural walkways with exact street addresses.</p>
+                </div>
+            </div>
+            <div id="places-cards-container" class="places-grid">
+                <!-- Dynamically Rendered by app.js -->
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. VIEW: INTERACTIVE MAP RADAR -->
+    <section id="view-map" class="section view-section" style="display: none;">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Pan-India Spatial GIS Radar & Map</h2>
+                    <p class="section-desc">Real-time GPS mapping across India with categorized pins and fly-to city coordinates.</p>
+                </div>
+            </div>
+
+            <div class="map-container-wrapper">
+                <div class="map-sidebar">
+                    <h3 class="map-sidebar-title"><i class="fas fa-layer-group text-primary-600"></i> Map Controls</h3>
+                    <div class="map-layer-filter">
+                        <button class="layer-toggle-btn active" onclick="window.smartCityApp.syncMapMarkers()">
+                            <span><i class="fas fa-globe-asia text-primary-600"></i> All Indian Nodes</span>
+                            <span>21</span>
+                        </button>
+                        <button class="layer-toggle-btn" onclick="window.smartCityApp.loadEmergencyUnits()">
+                            <span><i class="fas fa-hospital text-rose-600"></i> Major Hospitals & ICUs</span>
+                            <span>5</span>
+                        </button>
+                        <button class="layer-toggle-btn" onclick="window.smartCityApp.filterPlacesByCategory('FOOD', null)">
+                            <span><i class="fas fa-utensils text-amber-600"></i> Famous Khau Gallis</span>
+                            <span>6</span>
+                        </button>
+                    </div>
+
+                    <div style="margin-top: auto; background: #fff; padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--slate-200); font-size: 0.8rem;">
+                        <b><i class="fas fa-location-crosshairs text-primary-600"></i> Active Geo-Node:</b><br>
+                        Location: Selected Indian City<br>
+                        Coverage: All 28 States & 8 UTs
+                    </div>
+                </div>
+
+                <div class="map-viewport">
+                    <div id="smart-map"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. VIEW: EMERGENCY SOS RADAR -->
+    <section id="view-emergency" class="section view-section" style="display: none;">
+        <div class="container">
+            <div class="emergency-banner">
+                <div>
+                    <h3><i class="fas fa-triangle-exclamation"></i> 24x7 All-India Emergency Network</h3>
+                    <p>Direct connectivity to Police Command, Advanced Life Support Ambulances, Fire Rescue, and Blood Banks.</p>
+                </div>
+                <button onclick="window.smartCityApp.triggerSosAlert()" style="background: #fff; color: var(--rose-600); font-weight: 700; padding: 10px 24px; border-radius: var(--radius-full); font-size: 0.95rem;">
+                    <i class="fas fa-bolt"></i> Send Instant SOS
+                </button>
+
+                <div class="emergency-dials-grid">
+                    <a href="tel:112" class="emergency-dial-card">
+                        <i class="fas fa-headset emergency-dial-icon"></i>
+                        <div class="emergency-dial-info">
+                            <h4>Dial 112</h4>
+                            <span>National Emergency</span>
+                        </div>
+                    </a>
+                    <a href="tel:102" class="emergency-dial-card">
+                        <i class="fas fa-truck-medical emergency-dial-icon"></i>
+                        <div class="emergency-dial-info">
+                            <h4>Dial 102 / 108</h4>
+                            <span>Ambulance & Trauma</span>
+                        </div>
+                    </a>
+                    <a href="tel:101" class="emergency-dial-card">
+                        <i class="fas fa-fire-extinguisher emergency-dial-icon"></i>
+                        <div class="emergency-dial-info">
+                            <h4>Dial 101</h4>
+                            <span>Fire & Disaster Squad</span>
+                        </div>
+                    </a>
+                    <a href="tel:1091" class="emergency-dial-card">
+                        <i class="fas fa-female emergency-dial-icon"></i>
+                        <div class="emergency-dial-info">
+                            <h4>Dial 1091</h4>
+                            <span>Women Safety Line</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <div>
+                    <h3 class="section-title">Major State Hospitals & ICU Beds Radar</h3>
+                    <p class="section-desc">AIIMS, KEM Mumbai, SMS Jaipur, Victoria Bengaluru, BHU Trauma Center with live bed count.</p>
+                </div>
+            </div>
+
+            <div id="emergency-units-container" class="emergency-units-grid">
+                <!-- Rendered by app.js -->
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. VIEW: CITIZEN GRIEVANCE PORTAL -->
+    <section id="view-grievances" class="section view-section" style="display: none;">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Citizen Grievance Redressal Portal</h2>
+                    <p class="section-desc">Report civic issues in your city, colony street, or local gully with live tracking tokens.</p>
+                </div>
+            </div>
+
+            <div class="grievance-layout">
+                <!-- Submission Form -->
+                <div class="grievance-form-card">
+                    <h3 style="margin-bottom: 6px;"><i class="fas fa-pen-to-square text-primary-600"></i> File a Civic Complaint</h3>
+                    <p style="font-size: 0.85rem; color: var(--slate-600); margin-bottom: 20px;">Your report will be automatically routed to the responsible Municipal Board.</p>
+
+                    <form id="grievance-submission-form">
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label class="form-label">Citizen Full Name *</label>
+                                <input type="text" id="grv-name" class="form-control" placeholder="e.g. Aarav Sharma" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Phone Number *</label>
+                                <input type="tel" id="grv-phone" class="form-control" placeholder="+91-9876543210" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label class="form-label">Select State *</label>
+                                <select id="grv-state-select" class="form-control" required>
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">City / District *</label>
+                                <input type="text" id="grv-city-input" class="form-control" placeholder="e.g. New Delhi, Mumbai, Jaipur" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label class="form-label">Street Name / Gully / Road *</label>
+                                <input type="text" id="grv-street-input" class="form-control" placeholder="e.g. MG Road, Near Metro Pillar 142" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Issue Category *</label>
+                                <select id="grv-category" class="form-control" required>
+                                    <option value="ROAD_POTHOLE">Road Pothole & Skid Hazard</option>
+                                    <option value="STREET_LIGHT">Broken / Non-working Streetlight</option>
+                                    <option value="GARBAGE_COLLECTION">Garbage Dump & Overflowing Bin</option>
+                                    <option value="WATER_LEAKAGE">Water Pipeline Leakage</option>
+                                    <option value="TRAFFIC_SIGNAL">Traffic Signal Fault</option>
+                                    <option value="SEWAGE_DRAINAGE">Sewage / Drainage Overflow</option>
+                                    <option value="OTHER">Other Municipal Issue</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Complaint Title *</label>
+                            <input type="text" id="grv-title" class="form-control" placeholder="Brief summary of the issue" required>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label class="form-label">Zone / Colony Area *</label>
+                                <input type="text" id="grv-zone" class="form-control" placeholder="e.g. Sector 14 / Central Zone" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Urgency / Priority</label>
+                                <select id="grv-priority" class="form-control">
+                                    <option value="MEDIUM">Medium Priority</option>
+                                    <option value="HIGH">High Priority (Skid / Safety Danger)</option>
+                                    <option value="CRITICAL">Critical Emergency</option>
+                                    <option value="LOW">Low Priority</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Exact Location Landmark & PIN Code *</label>
+                            <input type="text" id="grv-address" class="form-control" placeholder="e.g. Opp. City Bank, PIN 110006" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Detailed Description of Problem *</label>
+                            <textarea id="grv-desc" class="form-control" rows="3" placeholder="Provide details to assist the inspection squad..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-submit-grievance">
+                            <i class="fas fa-paper-plane"></i> Submit Grievance & Get Token
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Live Status Tracker & Feed -->
+                <div>
+                    <div class="grievance-track-card" style="margin-bottom: 24px;">
+                        <h3 style="margin-bottom: 6px;"><i class="fas fa-magnifying-glass-location text-primary-600"></i> Track Complaint Status</h3>
+                        <p style="font-size: 0.85rem; color: var(--slate-600); margin-bottom: 16px;">Enter your unique reference tracking token (e.g. GRV-2026-8901).</p>
+                        
+                        <form id="grievance-track-form" style="display: flex; gap: 10px;">
+                            <input type="text" id="track-token-input" class="form-control" placeholder="Enter Token ID..." required>
+                            <button type="submit" style="background: var(--primary-600); color: #fff; padding: 0 20px; border-radius: var(--radius-sm); font-weight: 600;">
+                                Track
+                            </button>
+                        </form>
+
+                        <div id="grievance-track-result"></div>
+                    </div>
+
+                    <!-- Recent Grievance Activity -->
+                    <div class="grievance-track-card">
+                        <h4 style="margin-bottom: 12px;"><i class="fas fa-clock-rotate-left text-slate-500"></i> Recent Public Grievances</h4>
+                        <div id="recent-grievances-list">
+                            <!-- Rendered by app.js -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. VIEW: CITY EVENTS & PASSES -->
+    <section id="view-events" class="section view-section" style="display: none;">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Pan-India Summits, Carnivals & Marathons</h2>
+                    <p class="section-desc">Reserve verified digital event passes with instant QR verification across Indian cities.</p>
+                </div>
+            </div>
+            <div id="events-cards-container" class="events-grid">
+                <!-- Rendered by app.js -->
+            </div>
+        </div>
+    </section>
+
+    <!-- 9. VIEW: SMART CLIMATE & AQI -->
+    <section id="view-weather" class="section view-section" style="display: none;">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Pan-India Environment & Air Quality Telemetry</h2>
+                    <p class="section-desc">Live atmospheric sensor metrics across major Indian cities.</p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                <div style="background: #fff; border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 24px; box-shadow: var(--shadow-sm);">
+                    <span style="font-size: 0.8rem; font-weight: 700; color: var(--emerald-600); text-transform: uppercase;">Average National AQI</span>
+                    <h3 style="font-size: 2.4rem; color: var(--emerald-600); margin: 6px 0;">72 <span style="font-size: 1rem; font-weight: 500; color: var(--slate-600);">US AQI</span></h3>
+                    <p style="font-size: 0.875rem; color: var(--slate-600);"><b>Status:</b> Satisfactory across major parks, heritage sites, and coastal walking boulevards.</p>
+                </div>
+
+                <div style="background: #fff; border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 24px; box-shadow: var(--shadow-sm);">
+                    <span style="font-size: 0.8rem; font-weight: 700; color: var(--primary-600); text-transform: uppercase;">Monitored States</span>
+                    <h3 style="font-size: 2.4rem; color: var(--slate-900); margin: 6px 0;">28 <span style="font-size: 1rem; font-weight: 500; color: var(--slate-600);">States & 8 UTs</span></h3>
+                    <p style="font-size: 0.875rem; color: var(--slate-600);">Real-time municipal telemetry active across 100+ Smart Cities.</p>
+                </div>
+
+                <div style="background: #fff; border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 24px; box-shadow: var(--shadow-sm);">
+                    <span style="font-size: 0.8rem; font-weight: 700; color: var(--amber-600); text-transform: uppercase;">Transit & EV Superchargers</span>
+                    <h3 style="font-size: 2.4rem; color: var(--slate-900); margin: 6px 0;">1,250+ <span style="font-size: 1rem; font-weight: 500; color: var(--slate-600);">Fast Docks</span></h3>
+                    <p style="font-size: 0.875rem; color: var(--slate-600);">Integrated metro cards and EV charging stations mapped on GIS radar.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 10. VIEW: ADMIN CONTROL CENTER -->
+    <section id="view-admin" class="section view-section" style="display: none;">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Pan-India Municipal Control & Dispatch Board</h2>
+                    <p class="section-desc">Civic operational telemetry and grievance resolution workflow across India.</p>
+                </div>
+            </div>
+
+            <!-- KPI Counters -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon-box blue"><i class="fas fa-map-location-dot"></i></div>
+                    <div class="kpi-data">
+                        <h4 id="kpi-total-places">21</h4>
+                        <span>Registered Landmarks</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon-box amber"><i class="fas fa-bullhorn"></i></div>
+                    <div class="kpi-data">
+                        <h4 id="kpi-active-grievances">3</h4>
+                        <span>Active Civic Grievances</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon-box green"><i class="fas fa-circle-check"></i></div>
+                    <div class="kpi-data">
+                        <h4 id="kpi-resolution-rate">85%</h4>
+                        <span>Resolution Efficiency</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon-box rose"><i class="fas fa-bed-pulse"></i></div>
+                    <div class="kpi-data">
+                        <h4 id="kpi-icu-beds">192</h4>
+                        <span>Hospital ICU Beds</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Table and Chart -->
+            <div class="admin-tables-layout">
+                <div class="data-table-card">
+                    <h3><i class="fas fa-list-check text-primary-600"></i> Grievance Redressal Dispatch Board</h3>
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Token ID</th>
+                                    <th>Citizen</th>
+                                    <th>Category</th>
+                                    <th>City & State</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-grievance-tbody">
+                                <!-- Rendered dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="data-table-card">
+                    <h3><i class="fas fa-chart-pie text-primary-600"></i> Issues by Category</h3>
+                    <div style="margin-top: 20px;">
+                        <canvas id="admin-analytics-chart" width="280" height="280"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================================================
+       MODALS
+       ========================================================================== -->
+
+    <!-- PROFESSOR & EXAMINER DOWNLOADS KIT MODAL -->
+    <div id="professor-downloads-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 600px;">
+            <div class="modal-header" style="background: #1e3a8a; color: #fff;">
+                <h3 style="color: #fff;"><i class="fas fa-graduation-cap" style="color: #60a5fa;"></i> Professor & Examiner Submission Kit</h3>
+                <button onclick="window.smartCityApp.closeModal('professor-downloads-modal')" class="modal-close-btn" style="color: #fff;"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.9rem; color: var(--slate-600); margin-bottom: 20px;">
+                    Download complete college submission materials, certified project report with full source code, MySQL relational schema, and Viva Voce guide:
+                </p>
+
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    
+                    <!-- 1. PDF Report & Code -->
+                    <div style="background: #f8fafc; border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 14px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 42px; height: 42px; background: #fee2e2; color: #dc2626; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div>
+                                <h4 style="font-size: 0.95rem; margin-bottom: 2px;">Complete Project Report & Code</h4>
+                                <span style="font-size: 0.775rem; color: var(--slate-500);">A4 Format &bull; Java & MySQL &bull; 172 KB PDF</span>
+                            </div>
+                        </div>
+                        <a href="downloads/SMART_CITY_GUIDE_PROJECT_REPORT_AND_SOURCE_CODE.pdf" onclick="window.smartCityApp.triggerDirectDownload('SMART_CITY_GUIDE_PROJECT_REPORT_AND_SOURCE_CODE.pdf')" download="SMART_CITY_GUIDE_PROJECT_REPORT_AND_SOURCE_CODE.pdf" style="background: #2563eb; color: #fff; padding: 8px 16px; border-radius: 6px; font-size: 0.825rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-download"></i> Download PDF
+                        </a>
+                    </div>
+
+                    <!-- 2. Full Source Code ZIP -->
+                    <div style="background: #f8fafc; border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 14px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 42px; height: 42px; background: #dbeafe; color: #2563eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                                <i class="fas fa-file-zipper"></i>
+                            </div>
+                            <div>
+                                <h4 style="font-size: 0.95rem; margin-bottom: 2px;">Complete Project Source Code Bundle</h4>
+                                <span style="font-size: 0.775rem; color: var(--slate-500);">Java Spring Boot + MySQL + Docs &bull; ZIP</span>
+                            </div>
+                        </div>
+                        <a href="downloads/Smart_City_Guide_Full_Source_Code.zip" onclick="window.smartCityApp.triggerDirectDownload('Smart_City_Guide_Full_Source_Code.zip')" download="Smart_City_Guide_Full_Source_Code.zip" style="background: #059669; color: #fff; padding: 8px 16px; border-radius: 6px; font-size: 0.825rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-download"></i> Download ZIP
+                        </a>
+                    </div>
+
+                    <!-- 3. MySQL Database Script -->
+                    <div style="background: #f8fafc; border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 14px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 42px; height: 42px; background: #fef3c7; color: #d97706; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div>
+                                <h4 style="font-size: 0.95rem; margin-bottom: 2px;">Pan-India MySQL Database Script</h4>
+                                <span style="font-size: 0.775rem; color: var(--slate-500);">DDL Schema, Stored Procedures & Seed Data &bull; .SQL</span>
+                            </div>
+                        </div>
+                        <a href="downloads/smart_city_db.sql" download="smart_city_db.sql" style="background: #d97706; color: #fff; padding: 8px 16px; border-radius: 6px; font-size: 0.825rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-download"></i> Download SQL
+                        </a>
+                    </div>
+
+                    <!-- 4. Viva Voce Q&A -->
+                    <div style="background: #f8fafc; border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 14px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 42px; height: 42px; background: #ede9fe; color: #7c3aed; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                                <i class="fas fa-clipboard-question"></i>
+                            </div>
+                            <div>
+                                <h4 style="font-size: 0.95rem; margin-bottom: 2px;">Viva Voce Exam Questions & Answers</h4>
+                                <span style="font-size: 0.775rem; color: var(--slate-500);">Top 30+ University Examination Q&A &bull; Markdown/Text</span>
+                            </div>
+                        </div>
+                        <a href="downloads/VIVA_QUESTIONS_AND_ANSWERS.md" download="VIVA_QUESTIONS_AND_ANSWERS.md" style="background: #7c3aed; color: #fff; padding: 8px 16px; border-radius: 6px; font-size: 0.825rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-download"></i> Download Q&A
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PLACE DETAILS MODAL -->
+    <div id="place-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fas fa-landmark text-primary-600"></i> Place & Heritage Street Guide</h3>
+                <button onclick="window.smartCityApp.closeModal('place-modal')" class="modal-close-btn"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div id="place-modal-body" class="modal-body">
+                <!-- Rendered dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SOS ALERT TRIGGER MODAL -->
+    <div id="sos-alert-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 480px; text-align: center;">
+            <div class="modal-header" style="background: var(--rose-50); border-bottom-color: var(--rose-200);">
+                <h3 style="color: var(--rose-600);"><i class="fas fa-triangle-exclamation"></i> Emergency SOS Broadcast</h3>
+                <button onclick="window.smartCityApp.closeModal('sos-alert-modal')" class="modal-close-btn"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div style="width: 70px; height: 70px; background: var(--rose-50); color: var(--rose-600); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 16px auto;">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h4>All-India Rapid Emergency Dispatch</h4>
+                <p style="font-size: 0.875rem; color: var(--slate-600); margin: 10px 0 20px 0;">
+                    Your GPS coordinates are connected to the Unified National Emergency Grid (112) and nearest state trauma center.
+                </p>
+
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a href="tel:112" style="background: var(--rose-600); color: #fff; padding: 12px; border-radius: var(--radius-sm); font-weight: 700; font-size: 1rem; display: block;">
+                        <i class="fas fa-phone-alt"></i> Call Emergency 112
+                    </a>
+                    <a href="tel:102" style="background: var(--slate-800); color: #fff; padding: 12px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.95rem; display: block;">
+                        <i class="fas fa-ambulance"></i> Call Ambulance (102 / 108)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GRIEVANCE CREATION SUCCESS MODAL -->
+    <div id="grievance-success-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 480px; text-align: center;">
+            <div class="modal-header" style="background: var(--emerald-50);">
+                <h3 style="color: var(--emerald-600);"><i class="fas fa-circle-check"></i> Grievance Registered!</h3>
+                <button onclick="window.smartCityApp.closeModal('grievance-success-modal')" class="modal-close-btn"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.9rem; color: var(--slate-600); margin-bottom: 16px;">
+                    Your civic issue has been logged into the Municipal Smart Grid.
+                </p>
+                <div style="background: var(--slate-50); border: 2px dashed var(--primary-500); padding: 16px; border-radius: var(--radius-md); margin-bottom: 16px;">
+                    <span style="font-size: 0.775rem; color: var(--slate-500);">YOUR TRACKING TOKEN</span>
+                    <h3 id="created-token-display" style="color: var(--primary-700); font-size: 1.4rem; letter-spacing: 1px; margin-top: 4px;">GRV-2026-0000</h3>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--slate-600); margin-bottom: 20px;">
+                    Assigned Department: <b id="created-dept-display">Public Works Department</b>
+                </div>
+                <button onclick="window.smartCityApp.closeModal('grievance-success-modal')" style="width: 100%; background: var(--primary-600); color: #fff; padding: 10px; border-radius: var(--radius-sm); font-weight: 600;">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EVENT PASS BOOKING MODAL -->
+    <div id="event-pass-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fas fa-ticket text-emerald-600"></i> Reserve Digital E-Pass</h3>
+                <button onclick="window.smartCityApp.closeModal('event-pass-modal')" class="modal-close-btn"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <h4 id="booking-event-title" style="font-size: 1.15rem; margin-bottom: 4px;">Event Title</h4>
+                <div id="booking-event-fee" style="font-size: 0.85rem; font-weight: 700; color: var(--emerald-600); margin-bottom: 18px;">Free Entry</div>
+
+                <form id="pass-booking-form">
+                    <input type="hidden" id="booking-event-id">
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" id="pass-name" class="form-control" placeholder="e.g. Aarav Sharma" required>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Email Address *</label>
+                            <input type="email" id="pass-email" class="form-control" placeholder="aarav@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Mobile Number *</label>
+                            <input type="tel" id="pass-phone" class="form-control" placeholder="+91-9876543210" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Number of Passes</label>
+                        <select id="pass-tickets" class="form-control">
+                            <option value="1">1 Person</option>
+                            <option value="2">2 Persons</option>
+                            <option value="3">3 Persons</option>
+                            <option value="4">4 Persons</option>
+                        </select>
+                    </div>
+                    <button type="submit" style="width: 100%; background: var(--emerald-600); color: #fff; padding: 12px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.95rem;">
+                        <i class="fas fa-qrcode"></i> Generate Verified Digital E-Pass
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- DIGITAL TICKET VIEWER MODAL -->
+    <div id="ticket-viewer-modal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 440px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-id-card text-emerald-600"></i> Digital Pass Generated</h3>
+                <button onclick="window.smartCityApp.closeModal('ticket-viewer-modal')" class="modal-close-btn"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div id="ticket-result-content" class="modal-body">
+                <!-- Rendered dynamically with QR Code -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 11. FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3><i class="fas fa-city" style="color: var(--primary-500);"></i> SMARTCITY INDIA</h3>
+                    <p>
+                        Comprehensive Pan-India Urban Navigation, Heritage Street Directory, Citizen Grievance Redressal, and SOS Emergency Radar platform engineered for 100+ Smart Cities.
+                    </p>
+                </div>
+                <div class="footer-col">
+                    <h4>Pan-India Cities</h4>
+                    <ul class="footer-links">
+                        <li><a href="javascript:void(0)" onclick="window.smartCityApp.selectQuickCity('New Delhi', 'Delhi (NCR)')">Delhi (NCR)</a></li>
+                        <li><a href="javascript:void(0)" onclick="window.smartCityApp.selectQuickCity('Mumbai', 'Maharashtra')">Mumbai</a></li>
+                        <li><a href="javascript:void(0)" onclick="window.smartCityApp.selectQuickCity('Jaipur', 'Rajasthan')">Jaipur</a></li>
+                        <li><a href="javascript:void(0)" onclick="window.smartCityApp.selectQuickCity('Varanasi', 'Uttar Pradesh')">Varanasi</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Tech Architecture</h4>
+                    <ul class="footer-links">
+                        <li><span>Backend: Java Spring Boot 3</span></li>
+                        <li><span>Database: MySQL Pan-India Schema</span></li>
+                        <li><span>API: RESTful JSON Endpoints</span></li>
+                        <li><span>Mapping: Leaflet & OpenStreetMap</span></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Professor Submission Kit</h4>
+                    <p style="font-size: 0.85rem; color: var(--slate-400); margin-bottom: 12px;">
+                        Direct 1-click downloads for project report PDF, full source code ZIP, and MySQL database script.
+                    </p>
+                    <button onclick="window.smartCityApp.openModal('professor-downloads-modal')" style="background: var(--primary-600); color: #fff; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 0.825rem; font-weight: 700; border: none; cursor: pointer;">
+                        <i class="fas fa-download"></i> Open Downloads Modal
+                    </button>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div>&copy; 2026 Smart City Mission of India. Built for College Final Project / Capstone Submission.</div>
+                <div>Java Spring Boot &bull; Hibernate JPA &bull; MySQL &bull; Responsive UI</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Libraries: Leaflet & Chart.js -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- Application Scripts -->
+    <script src="js/mock-data.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

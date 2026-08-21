@@ -1,0 +1,6 @@
+.target/
+backend-java/target/
+*.class
+.DS_Store
+.idea/
+.vscode/
